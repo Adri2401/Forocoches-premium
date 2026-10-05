@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.0
+// @version      1.7.1
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -169,13 +169,15 @@
   [${BADGE_ATTR}] svg { width: 1.25em; height: 1.25em; fill: currentColor; }
   @media (prefers-reduced-motion: reduce) { [${GOLD_ATTR}] { animation: none; } }
 `;
-    /* ── Tema dorado: solo con el modo oscuro activo. Los acentos de la web (coral) pasan a oro
-     * cambiando sus variables, y los iconos rojos o blancos se tiñen con un filtro.          ── */
+    /* ── Tema dorado: solo con el modo oscuro activo. El oro queda para lo tuyo y la interfaz
+     * (cabecera, botones, favoritos, paneles). Lo de los demás (nicks, hilos, mensajes) va en
+     * blanco y grises: el coral de la web pasa a neutro cambiando sus variables.             ── */
     const ICONO_ORO = 'grayscale(1) brightness(1.15) sepia(1) saturate(2.4) hue-rotate(-6deg) brightness(.95)';
+    const ICONO_NEUTRO = 'grayscale(1) brightness(1.5)';
     const GOLD_RULES = !CFG.temaDorado ? '' : `
   ${G} > body {
-    --coral: #e3b552 !important; --new-primary: #b8862b !important; --new-button-red-hover: #9c7022 !important;
-    --link-hover: #f1cf72 !important; --thread-notification-bullet-blue: #c9993a !important;
+    --coral: #ededed !important; --new-primary: #b8862b !important; --new-button-red-hover: #9c7022 !important;
+    --link-hover: #ffffff !important; --thread-notification-bullet-blue: #5a5a5a !important;
     --forum-title-background: transparent !important;
   }
   ${G} { scrollbar-color: #4a3812 #000 !important; accent-color: #d4a640; caret-color: #e3b552; }
@@ -192,13 +194,12 @@
     font: 700 11px/1 system-ui, -apple-system, Roboto, sans-serif !important; letter-spacing: .18em !important;
     text-transform: uppercase !important; color: #d4a640 !important;
   }
-  ${G} .threads-list > div + div { border-top: 1px solid rgba(212, 166, 64, .09) !important; }
-  ${G} [style*="--message"], ${G} [style*="--tema-participado"], ${G} [style*="--tema-golden"],
+  ${G} .threads-list > div + div { border-top: 1px solid rgba(255, 255, 255, .06) !important; }
+  ${G} [style*="5px var(--coral)"] { border-left-color: #3a3a3a !important; }
+  ${G} .threads-list [style*="--message"], ${G} .threads-list [style*="--tema-participado"] { filter: ${ICONO_NEUTRO} !important; }
   ${G} [style*="--next-right-icon"], ${G} [style*="--next-left-icon"], ${G} [style*="--final-right-icon"],
   ${G} [style*="--final-left-icon"], ${G} [style*="--go-to-post"], ${G} [style*="--boton-reply"],
   ${G} .forocoches-search-icon, ${G} .subscribe-thread-icon { filter: ${ICONO_ORO} !important; }
-  ${G} .threads-list [style*="--citas"] { filter: ${ICONO_ORO} opacity(.75) !important; }
-  ${G} .quote { border-left-color: #b8862b !important; }
 `;
     style.textContent = `@layer fc-oled {${RULES}${AD_RULES}${LN_RULES}${PREMIUM_RULES}${GOLD_RULES}}\n${RULES}${AD_RULES}${LN_RULES}${PREMIUM_RULES}${GOLD_RULES}`;
     // Va el primero del documento: así su @layer se declara antes que cualquier capa de la web
