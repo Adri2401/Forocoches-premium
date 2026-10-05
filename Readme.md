@@ -24,5 +24,3 @@ Activa las actualizaciones automáticas para recibir siempre la última versión
 3. Comprueba también que en el script, en su pestaña **Configuración**, está marcada la opción **Buscar actualizaciones**.
 
 Si quieres actualizar en el momento, en el panel de Tampermonkey pulsa **Buscar actualizaciones**.
-
-> `forocoches-oled.user.js` es el enlace antiguo: solo sirve para que las instalaciones viejas se pasen solas al nuevo. No hace falta tocarlo.
