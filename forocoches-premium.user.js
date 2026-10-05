@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.6.4
+// @version      1.6.5
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -1395,6 +1395,7 @@
 
     /* ───────────── Hilos: ocultar y favoritos ───────────── */
     const isThreadPage = /showthread\.php/i.test(location.pathname);
+    const isListPage = /forumdisplay\.php/i.test(location.pathname); // listado de temas de un subforo: el único sitio con favoritos arriba
     const listOf = (k) => { const v = store.get(k, []); return Array.isArray(v) ? v.filter((x) => x && x.id) : []; };
     let favoritos = listOf('favoritos');       // [{ id, titulo }]
     let hilosOcultos = listOf('hilosOcultos'); // [{ id, titulo }]
@@ -1418,7 +1419,8 @@
     function checkThreadLink(a) {
       if (isThreadPage || a.closest(`[${UI_ATTR}]`)) return;
       const id = linkId(a);
-      if (!id || (!hidSet.has(id) && !favSet.has(id))) return;
+      const fav = isListPage && favSet.has(id);
+      if (!id || (!hidSet.has(id) && !fav)) return;
       const row = rowOfLink(a);
       if (!row.hasAttribute(HID_ATTR)) row.setAttribute(HID_ATTR, hidSet.has(id) ? 'oculto' : 'fav');
       if (parsing()) pendingRows.add(a);
@@ -1453,7 +1455,7 @@
     let pinsHost = null;
     let pinsUI = null;
     function renderPinned() {
-      if (isThreadPage || parsing()) return;
+      if (!isListPage || parsing()) return;
       if (!favoritos.length) { if (pinsHost) pinsHost.remove(); pinsHost = null; return; }
       const rows = [];
       const seen = new Set();
