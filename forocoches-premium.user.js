@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.6.6
+// @version      1.6.7
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -763,11 +763,14 @@
     const AD_TEXTS = [
       /^amazon\s*¡?nuevas ofertas cada d[ií]a!?$/i,
     ];
-    const AD_TRIGGER = /ofertas cada d[ií]a/i;
+    // Patrocinadores oficiales (p. ej. "Surfshark… La VPN Oficial del foro"): banner corto con logo
+    const SPONSOR_RE = /oficial del foro/i;
+    const AD_TRIGGER = /ofertas cada d[ií]a|oficial del foro/i;
 
     // Desde el texto, el primer bloque cuyo texto completo sea el de la promoción.
     // Los envoltorios decorativos (el fondo de puntos) los recoge collapseUp.
     function adBoxFromText(node) {
+      if (SPONSOR_RE.test(node.data)) return sponsorBoxFromText(node);
       let el = node.parentElement;
       for (let i = 0; i < 8 && el && el !== document.body && el !== root; i++, el = el.parentElement) {
         const t = textOf(el);
@@ -775,6 +778,21 @@
         if (AD_TEXTS.some((re) => re.test(t))) return el;
       }
       return null;
+    }
+
+    // Banner de patrocinador: el bloque más grande con poco texto, sin hilos ni usuarios y con logo.
+    // Nunca dentro de un mensaje ni en un título (alguien puede escribir "oficial del foro").
+    function sponsorBoxFromText(node) {
+      const start = node.parentElement;
+      if (!start || start.closest(`${CONTENT_LINKS}, .postbit, .postcontainer, [id^="post_message_"], h1, h2, textarea, [contenteditable], [${UI_ATTR}]`)) return null;
+      let box = null;
+      for (let el = start, i = 0; i < 8 && el && el !== document.body && el !== root; i++, el = el.parentElement) {
+        if (parsing() && !isClosed(el)) break;
+        if (textOf(el).length > 160 || el.matches(CONTENT_LINKS) || el.querySelector(CONTENT_LINKS)) break;
+        box = el;
+      }
+      const conLogoOEnlace = box && (box.querySelector('img, picture, svg, [style*="background-image"], a[href]') || box.closest('a[href]'));
+      return conLogoOEnlace ? box : null;
     }
 
     // Revisión inmediata de cada nodo nuevo (se ejecuta antes de que el navegador lo pinte)
