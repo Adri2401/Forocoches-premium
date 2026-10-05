@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.6
+// @version      1.7.8
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -111,7 +111,7 @@
       '[id~="ad"]', '[id^="ad-slot"]', '[id^="adslot"]',
       '[class*="publicidad" i]', '[id*="publicidad" i]', '[class*="patrocin" i]',
       // ForoCoches: avisos de vBulletin encima de los listados (banner del patrocinador, p. ej. Surfshark)
-      'form#vbnotices', '.navbar_notice', '.fc-custom-promo',
+      'form#vbnotices', '.navbar_notice', '.fc-custom-promo', '.fixed_adslot', '[class*="Mobile_Pos"]', '[class*="Mobile_Bottom"]',
     ].filter(validSel);
     const AD_JOINED = AD_CSS.join(', ');
     const hideRules = (sels) => sels.map((sel) => `${sel} { display: none !important; }`).join('\n');
@@ -202,9 +202,19 @@
   ${G} .quote { border-left-color: #5a5a5a !important; }
   ${G} .tablinks.active { color: #e3b552 !important; border-bottom-color: #d4a640 !important; }
   ${G} .tablinks.active [class^="tabImage"], ${G} .menu-icon, ${G} .forum_item_icon,
-  ${G} [style*="--report"], ${G} [style*="--boton-citar"], ${G} img[id^="mq_"] { filter: ${ICONO_ORO} !important; }
-  ${G} .threads-list [style*="--message"], ${G} .threads-list [style*="--tema-participado"] { filter: ${ICONO_ORO} opacity(.5) !important; }
-  ${G} .threads-list [style*="--citas"] { opacity: .4 !important; }
+  ${G} [style*="--report"], ${G} [style*="--boton-citar"], ${G} img[id^="mq_"],
+  ${G} .forum_title_icon:not([style*="--message"]):not([style*="--citas"]), ${G} .post-controls-icon, ${G} .back-button,
+  ${G} .social-media-button-large-margin, ${G} .social-media-button-quickreply, ${G} .subheader-icon, ${G} .button-eye-preview,
+  ${G} .subheader-hide-chevron, ${G} #searchfield-search-icon, ${G} [style*="--trending_icon"] { filter: ${ICONO_ORO} !important; }
+  ${G} .rounded-button, ${G} input[type="submit"]:not([class*="no-filled"]) {
+    background: #b8862b !important; border-color: #b8862b !important; color: #fff !important;
+  }
+  ${G} #sorting, ${G} #sorting .social-media-button-quickreply { background-color: transparent !important; }
+  ${G} .switch input:checked + .slider { background-color: rgba(212, 166, 64, .35) !important; }
+  ${G} .switch .slider::before { background-color: #e3b552 !important; }
+  ${G} [style*="--message"], ${G} [style*="--tema-participado"] { filter: ${ICONO_ORO} opacity(.5) !important; }
+  ${G} .threads-list [style*="--citas"], ${G} .single-icon-image[style*="--citas"] { opacity: .45 !important; }
+  ${G} .threads-list [style*="--citas"] + span { margin-right: 12px !important; font-variant-numeric: tabular-nums; }
   ${G} [style*="--next-right-icon"], ${G} [style*="--next-left-icon"], ${G} [style*="--final-right-icon"],
   ${G} [style*="--final-left-icon"], ${G} [style*="--go-to-post"], ${G} [style*="--boton-reply"],
   ${G} .forocoches-search-icon, ${G} .subscribe-thread-icon { filter: ${ICONO_ORO} !important; }
