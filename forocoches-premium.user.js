@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.8.0
+// @version      1.8.1
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -1651,16 +1651,16 @@
     }
     const BAR_CSS = `
       :host { display: block; }
-      .bar { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 12px 16px 16px; }
-      button { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; min-height: 40px;
-               padding: 0 16px; border-radius: 999px; border: 1px solid rgba(212, 166, 64, .4); color: #eadcb8; cursor: pointer;
-               font: 600 14px/1 system-ui, -apple-system, Roboto, sans-serif; -webkit-tap-highlight-color: transparent;
-               transition: transform .12s, border-color .2s, color .2s; }
-      button:active { transform: scale(.96); }
-      button svg { width: 17px; height: 17px; fill: currentColor; }
+      .bar { display: flex; justify-content: center; gap: 8px; margin: 6px 16px 10px; }
+      button { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 5px; height: 28px;
+               padding: 0 11px; border-radius: 999px; border: 1px solid rgba(212, 166, 64, .35); color: #e6d6ad; cursor: pointer;
+               font: 600 12px/1 system-ui, -apple-system, Roboto, sans-serif; letter-spacing: .01em; white-space: nowrap;
+               -webkit-tap-highlight-color: transparent; transition: transform .12s, background .2s, border-color .2s, color .2s; }
+      button:active { transform: scale(.95); }
+      button svg { width: 13px; height: 13px; fill: currentColor; flex: none; }
       button.fav.on { background: linear-gradient(135deg, #f6e27a, #d4a640 55%, #b5832a); border-color: transparent; color: #1f1500;
-                      box-shadow: 0 2px 14px rgba(212, 166, 64, .35); }
-      button.hid.on { border-color: rgba(255, 90, 74, .7); color: #ff8a7a; }
+                      box-shadow: 0 1px 8px rgba(212, 166, 64, .3); }
+      button.hid.on { border-style: dashed; border-color: rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .05); color: #9a9a9a; }
     `;
     let barHost = null;
     function tryInsertBar() {
@@ -1683,9 +1683,11 @@
         const fav = favSet.has(id);
         const hid = hidSet.has(id);
         bFav.className = `fav${fav ? ' on' : ''}`;
-        bFav.replaceChildren(svgIcon(STAR), fav ? 'En favoritos' : 'Añadir a favoritos');
+        bFav.replaceChildren(svgIcon(STAR), fav ? 'En favoritos' : 'Favorito');
+        bFav.title = fav ? 'Quitar de favoritos' : 'Añadir a favoritos';
         bHid.className = `hid${hid ? ' on' : ''}`;
-        bHid.replaceChildren(svgIcon(EYE_OFF), hid ? 'Oculto · deshacer' : 'Ocultar hilo');
+        bHid.replaceChildren(svgIcon(EYE_OFF), hid ? 'Oculto' : 'Ocultar');
+        bHid.title = hid ? 'Oculto en los listados. Pulsa para volver a mostrarlo' : 'No mostrar este hilo en los listados';
       };
       bFav.addEventListener('click', () => toggleThread('fav', id, titulo));
       bHid.addEventListener('click', () => toggleThread('hid', id, titulo));
