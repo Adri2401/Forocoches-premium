@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.2
+// @version      1.7.3
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -115,7 +115,8 @@
     ].filter(validSel);
     const AD_JOINED = AD_CSS.join(', ');
     const hideRules = (sels) => sels.map((sel) => `${sel} { display: none !important; }`).join('\n');
-    const AD_RULES = CFG.quitarAnuncios ? hideRules([...AD_CSS, '[data-fc-ad]']) : '';
+    // El fondo de puntos (--bg-publi) es el relleno de los huecos de anuncios: sin anuncios, fuera
+    const AD_RULES = CFG.quitarAnuncios ? `${hideRules([...AD_CSS, '[data-fc-ad]'])}\nbody { --bg-publi: none !important; }` : '';
 
     // Almacenamiento: GM_* si Tampermonkey lo da (no lo borra la web), si no localStorage
     const store = {
