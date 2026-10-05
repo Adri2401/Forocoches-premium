@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.6.5
+// @version      1.6.6
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -1414,6 +1414,16 @@
       return row;
     }
 
+    // Una fila de verdad está en un listado: tiene al menos 4 hermanas que enlazan cada una a un único hilo.
+    // Así no se cuelan bloques sueltos con un enlace a un hilo (p. ej. el menú de usuario).
+    function isListRow(row) {
+      const par = row.parentElement;
+      if (!par || par === document.body) return false;
+      let n = 0;
+      for (const c of par.children) if (threadIds(c).size === 1 && ++n >= 4) return true;
+      return false;
+    }
+
     // En los listados: los ocultos desaparecen y los favoritos se quitan de su sitio (van arriba)
     const pendingRows = new Set();
     function checkThreadLink(a) {
@@ -1422,6 +1432,11 @@
       const fav = isListPage && favSet.has(id);
       if (!id || (!hidSet.has(id) && !fav)) return;
       const row = rowOfLink(a);
+      if (!parsing() && !isListRow(row)) {
+        // Marcado mientras cargaba la página, pero no es una fila del listado: se deja visible
+        for (let e = a; e && e !== row.parentElement; e = e.parentElement) e.removeAttribute(HID_ATTR);
+        return;
+      }
       if (!row.hasAttribute(HID_ATTR)) row.setAttribute(HID_ATTR, hidSet.has(id) ? 'oculto' : 'fav');
       if (parsing()) pendingRows.add(a);
     }
@@ -1442,15 +1457,15 @@
     // Bloque "★ Favoritos" anclado al principio del listado
     const PINS_CSS = `
       :host { display: block; }
-      .box { padding: 4px 0 10px; }
-      .hd { display: flex; align-items: center; gap: 6px; padding: 10px 16px 8px; color: #e0b450;
-            font: 700 12px/1 system-ui, -apple-system, Roboto, sans-serif; letter-spacing: .09em; text-transform: uppercase; }
-      .hd svg { width: 14px; height: 14px; fill: currentColor; }
-      a { display: block; margin: 0 0 8px; padding: 8px 16px 8px 14px; border-left: 2px solid #d4a640;
-          color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+      .box { padding: 2px 0 6px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+      .hd { display: flex; align-items: center; gap: 5px; padding: 6px 16px 4px; color: #e0b450;
+            font: 700 10px/1 system-ui, -apple-system, Roboto, sans-serif; letter-spacing: .09em; text-transform: uppercase; }
+      .hd svg { width: 11px; height: 11px; fill: currentColor; }
+      a { display: flex; align-items: baseline; gap: 10px; padding: 5px 16px; color: inherit; text-decoration: none;
+          font-size: 14px; line-height: 1.3; -webkit-tap-highlight-color: transparent; }
       a:active { opacity: .7; }
-      .t { font-weight: 700; color: #fff; line-height: 1.25; }
-      .m { margin-top: 5px; color: #8c8c8c; font-size: .88em; word-spacing: .15em; }
+      .t { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; color: #fff; }
+      .m { flex: none; color: #8c8c8c; font-size: 12px; white-space: nowrap; }
     `;
     let pinsHost = null;
     let pinsUI = null;
@@ -1470,7 +1485,8 @@
       let list = null;
       let best = 0;
       for (const [par, k] of byParent) if (k > best) { list = par; best = k; }
-      const first = rows.find((r) => r.parentElement === list);
+      const listRows = rows.filter((r) => r.parentElement === list);
+      const first = listRows[0];
       if (!pinsHost || !pinsHost.isConnected) {
         pinsHost = document.createElement(/^(UL|OL)$/.test(list.tagName) ? 'li' : 'div');
         pinsHost.setAttribute(UI_ATTR, 'favoritos');
@@ -1493,7 +1509,7 @@
       box.append(hd);
       for (const f of favoritos) {
         const id = String(f.id);
-        const row = rows.find((r) => threadIds(r).has(id));
+        const row = listRows.find((r) => threadIds(r).has(id));
         const a = document.createElement('a');
         const t = document.createElement('div');
         t.className = 't';
@@ -1507,12 +1523,14 @@
           while (w.nextNode()) { const x = w.currentNode.data.replace(/\s+/g, ' ').trim(); if (x) textos.push(x); }
           const largo = textos.reduce((acc, x) => (x.length > acc.length ? x : acc), '');
           if (largo.length >= 4) titulo = largo;
-          m.textContent = textos.filter((x) => x !== largo).join('  ');
+          // Solo respuestas y hora: lo justo para una línea
+          const resp = textos.find((x) => x !== largo && /^\d[\d.,]*$/.test(x));
+          const hora = [...textos].reverse().find((x) => /^\d{1,2}:\d{2}$/.test(x));
+          m.textContent = [resp, hora].filter(Boolean).join(' · ');
           const link = row.matches(THREAD_LINK) ? row : row.querySelector(THREAD_LINK);
           a.href = link ? link.href : `/foro/showthread.php?t=${id}`;
         } else {
           a.href = `/foro/showthread.php?t=${id}`;
-          m.textContent = 'Anclado';
         }
         t.textContent = titulo;
         a.append(t, m);
@@ -1530,8 +1548,18 @@
       const can = document.querySelector('link[rel="canonical"]');
       const c = can && THREAD_ID.exec(can.getAttribute('href') || '');
       if (c) return c[1];
+      const og = document.querySelector('meta[property="og:url"]');
+      const o = og && THREAD_ID.exec(og.getAttribute('content') || '');
+      if (o) return o[1];
+      const form = document.querySelector('form[action*="threadid="]');
+      const f = form && /threadid=(\d+)/.exec(form.getAttribute('action'));
+      if (f) return f[1];
       const count = new Map();
-      for (const a of document.querySelectorAll(THREAD_LINK)) { const id = linkId(a); if (id) count.set(id, (count.get(id) || 0) + 1); }
+      for (const a of document.querySelectorAll(THREAD_LINK)) {
+        if (a.closest('nav, header, .menu-item, [class*="menu" i]')) continue;
+        const id = linkId(a);
+        if (id) count.set(id, (count.get(id) || 0) + 1);
+      }
       let best = null;
       let n = 0;
       for (const [id, k] of count) if (k > n) { best = id; n = k; }
