@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.9
+// @version      1.8.0
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -210,6 +210,11 @@
     background: #b8862b !important; border-color: #b8862b !important; color: #fff !important;
   }
   ${G} #sorting, ${G} #sorting .social-media-button-quickreply { background-color: transparent !important; }
+  ${G} .user-notifications-container {
+    background: linear-gradient(135deg, #f6e27a, #d4a640 55%, #b5832a) !important; border-color: #000 !important;
+    box-shadow: 0 0 8px rgba(212, 166, 64, .45) !important;
+  }
+  ${G} .user-notifications { color: #1f1500 !important; font-weight: 800 !important; }
   ${G} .switch input:checked + .slider { background-color: rgba(212, 166, 64, .35) !important; }
   ${G} .switch .slider::before { background-color: #e3b552 !important; }
   ${G} [style*="--message"], ${G} [style*="--tema-participado"] { filter: ${ICONO_ORO} opacity(.5) !important; }
