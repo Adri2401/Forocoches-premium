@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         ForoCoches OLED
+// @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.6.2
+// @version      1.6.3
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-oled.user.js
