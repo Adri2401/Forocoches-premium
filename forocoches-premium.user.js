@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.5
+// @version      1.7.6
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -203,7 +203,8 @@
   ${G} .tablinks.active { color: #e3b552 !important; border-bottom-color: #d4a640 !important; }
   ${G} .tablinks.active [class^="tabImage"], ${G} .menu-icon, ${G} .forum_item_icon,
   ${G} [style*="--report"], ${G} [style*="--boton-citar"], ${G} img[id^="mq_"] { filter: ${ICONO_ORO} !important; }
-  ${G} .threads-list [style*="--message"], ${G} .threads-list [style*="--tema-participado"] { filter: ${ICONO_ORO} !important; }
+  ${G} .threads-list [style*="--message"], ${G} .threads-list [style*="--tema-participado"] { filter: ${ICONO_ORO} opacity(.5) !important; }
+  ${G} .threads-list [style*="--citas"] { opacity: .4 !important; }
   ${G} [style*="--next-right-icon"], ${G} [style*="--next-left-icon"], ${G} [style*="--final-right-icon"],
   ${G} [style*="--final-left-icon"], ${G} [style*="--go-to-post"], ${G} [style*="--boton-reply"],
   ${G} .forocoches-search-icon, ${G} .subscribe-thread-icon { filter: ${ICONO_ORO} !important; }
