@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches OLED
 // @namespace    https://forocoches.com/
-// @version      1.6.1
+// @version      1.6.2
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-oled.user.js
@@ -1476,6 +1476,13 @@
         pinsUI = pinsHost.attachShadow({ mode: 'closed' });
       }
       if (pinsHost.parentElement !== list || pinsHost.nextSibling !== first) list.insertBefore(pinsHost, first);
+      // Fondo opaco igual al de las filas: si no, se transparenta el fondo decorativo del listado
+      let fondo = root.hasAttribute(ON) ? '#000' : '';
+      for (let e = first; e; e = e.parentElement) {
+        const c = parseColor(getComputedStyle(e).backgroundColor);
+        if (c && c[3] >= 0.5) { fondo = `rgb(${c[0]}, ${c[1]}, ${c[2]})`; break; }
+      }
+      pinsHost.style.setProperty('background', fondo || 'transparent', 'important');
       const box = document.createElement('div');
       box.className = 'box';
       const hd = document.createElement('div');
