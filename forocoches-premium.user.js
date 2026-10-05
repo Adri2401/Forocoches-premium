@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.1
+// @version      1.7.2
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -54,6 +54,7 @@
   const HID_ATTR = 'data-fc-hid'; // fila de un hilo oculto o anclado en favoritos
   const GOLD_ATTR = 'data-fc-gold';
   const BADGE_ATTR = 'data-fc-premium';
+  const YO_ATTR = 'data-fc-yo'; // tu nick fuera del panel lateral (mensajes, listados)
   const KEY = 'fc-oled';
   const XHTML = 'http://www.w3.org/1999/xhtml';
   const SKIP = new Set(['HTML', 'HEAD', 'BODY', 'SCRIPT', 'STYLE', 'LINK', 'META', 'TITLE', 'BASE',
@@ -148,7 +149,7 @@
     style.id = 'fc-oled';
     const LN_RULES = hideRules([`[${LN_ATTR}]`, `[${HID_ATTR}]`]);
     const PREMIUM_RULES = `
-  [${GOLD_ATTR}] {
+  [${GOLD_ATTR}], [${YO_ATTR}] {
     background-image: linear-gradient(100deg, #a8741c 0%, #e9c46a 20%, #fff4c8 34%, #d9ab45 50%, #f6e27a 68%, #b5832a 84%, #e9c46a 100%) !important;
     background-size: 250% 100% !important; background-color: transparent !important;
     -webkit-background-clip: text !important; background-clip: text !important;
@@ -167,13 +168,12 @@
     box-shadow: inset 0 0 0 1px rgba(255, 236, 170, .55), 0 2px 12px rgba(212, 166, 64, .4);
   }
   [${BADGE_ATTR}] svg { width: 1.25em; height: 1.25em; fill: currentColor; }
-  @media (prefers-reduced-motion: reduce) { [${GOLD_ATTR}] { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { [${GOLD_ATTR}], [${YO_ATTR}] { animation: none; } }
 `;
-    /* ── Tema dorado: solo con el modo oscuro activo. El oro queda para lo tuyo y la interfaz
-     * (cabecera, botones, favoritos, paneles). Lo de los demás (nicks, hilos, mensajes) va en
-     * blanco y grises: el coral de la web pasa a neutro cambiando sus variables.             ── */
+    /* ── Tema dorado: solo con el modo oscuro activo. El oro queda para la interfaz (cabecera,
+     * botones, favoritos, paneles, iconos de los hilos) y para tu nick. Los nicks de los demás y
+     * lo de dentro de los mensajes va en blanco y grises: el coral de la web pasa a neutro.   ── */
     const ICONO_ORO = 'grayscale(1) brightness(1.15) sepia(1) saturate(2.4) hue-rotate(-6deg) brightness(.95)';
-    const ICONO_NEUTRO = 'grayscale(1) brightness(1.5)';
     const GOLD_RULES = !CFG.temaDorado ? '' : `
   ${G} > body {
     --coral: #ededed !important; --new-primary: #b8862b !important; --new-button-red-hover: #9c7022 !important;
@@ -196,7 +196,7 @@
   }
   ${G} .threads-list > div + div { border-top: 1px solid rgba(255, 255, 255, .06) !important; }
   ${G} [style*="5px var(--coral)"] { border-left-color: #3a3a3a !important; }
-  ${G} .threads-list [style*="--message"], ${G} .threads-list [style*="--tema-participado"] { filter: ${ICONO_NEUTRO} !important; }
+  ${G} .threads-list [style*="--message"], ${G} .threads-list [style*="--tema-participado"] { filter: ${ICONO_ORO} !important; }
   ${G} [style*="--next-right-icon"], ${G} [style*="--next-left-icon"], ${G} [style*="--final-right-icon"],
   ${G} [style*="--final-left-icon"], ${G} [style*="--go-to-post"], ${G} [style*="--boton-reply"],
   ${G} .forocoches-search-icon, ${G} .subscribe-thread-icon { filter: ${ICONO_ORO} !important; }
@@ -1807,6 +1807,34 @@
       span.after(premiumBadge());
     }
 
+    // Tu nick en dorado también en los mensajes y en los listados ("@nick" del último mensaje).
+    // Tu id y tu nick salen del menú de usuario y se recuerdan para las siguientes visitas.
+    let yo = store.get('yo', null);
+    function applyYo() {
+      if (!CFG.premium || !document.body) return;
+      const head = document.querySelector('a.user-profile-menu-header[href*="member.php?u="]');
+      const id = head && (/[?&]u=(\d+)/.exec(head.getAttribute('href')) || [])[1];
+      if (id && id !== '0') {
+        const nick = textOf(head);
+        if (nick && (!yo || yo.id !== id || yo.nick !== nick)) { yo = { id, nick }; store.set('yo', yo); }
+      }
+      if (!yo) return;
+      const fuera = '.user-profile-menu-container, .menu-options-container, .menu-item, [data-fc-ui]';
+      const mio = new RegExp(`member\\.php\\?u=${yo.id}(?:&|$)`);
+      for (const a of document.querySelectorAll(`a[href*="member.php?u=${yo.id}"]:not([${YO_ATTR}])`)) {
+        if (!mio.test(a.getAttribute('href')) || a.closest(fuera) || a.querySelector('img, svg') || !textOf(a)) continue;
+        a.setAttribute(YO_ATTR, '');
+      }
+      const nick = yo.nick.toLowerCase();
+      for (const sp of document.querySelectorAll(`.threads-list span:not([${YO_ATTR}])`)) {
+        if (sp.childElementCount || textOf(sp).toLowerCase() !== nick) continue;
+        const at = sp.previousElementSibling;
+        if (!at || textOf(at) !== '@') continue;
+        sp.setAttribute(YO_ATTR, '');
+        at.setAttribute(YO_ATTR, '');
+      }
+    }
+
     /* ── Enganches comunes ── */
     function extrasAdded(n) {
       if (n.nodeType === 3) {
@@ -1843,6 +1871,7 @@
       renderPinned();
       tryInsertBar();
       applyPremium();
+      applyYo();
     }
 
     if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('★ Favoritos e hilos ocultos', openThreadsPanel);
