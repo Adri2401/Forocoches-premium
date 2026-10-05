@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.3
+// @version      1.7.5
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -111,7 +111,7 @@
       '[id~="ad"]', '[id^="ad-slot"]', '[id^="adslot"]',
       '[class*="publicidad" i]', '[id*="publicidad" i]', '[class*="patrocin" i]',
       // ForoCoches: avisos de vBulletin encima de los listados (banner del patrocinador, p. ej. Surfshark)
-      'form#vbnotices', '.navbar_notice',
+      'form#vbnotices', '.navbar_notice', '.fc-custom-promo',
     ].filter(validSel);
     const AD_JOINED = AD_CSS.join(', ');
     const hideRules = (sels) => sels.map((sel) => `${sel} { display: none !important; }`).join('\n');
@@ -174,11 +174,13 @@
     /* ── Tema dorado: solo con el modo oscuro activo. El oro queda para la interfaz (cabecera,
      * botones, favoritos, paneles, iconos de los hilos) y para tu nick. Los nicks de los demás y
      * lo de dentro de los mensajes va en blanco y grises: el coral de la web pasa a neutro.   ── */
-    const ICONO_ORO = 'grayscale(1) brightness(1.15) sepia(1) saturate(2.4) hue-rotate(-6deg) brightness(.95)';
+    // Pasa cualquier icono (blanco, rojo, turquesa…) a negro y de ahí exactamente a #e3b552
+    const ICONO_ORO = 'brightness(0) saturate(100%) invert(98%) sepia(81%) saturate(2130%) hue-rotate(316deg) brightness(95%) contrast(87%)';
     const GOLD_RULES = !CFG.temaDorado ? '' : `
   ${G} > body {
     --coral: #ededed !important; --new-primary: #b8862b !important; --new-button-red-hover: #9c7022 !important;
     --link-hover: #ffffff !important; --thread-notification-bullet-blue: #5a5a5a !important;
+    --quote-color: #e3b552 !important;
     --forum-title-background: transparent !important;
   }
   ${G} { scrollbar-color: #4a3812 #000 !important; accent-color: #d4a640; caret-color: #e3b552; }
@@ -197,6 +199,10 @@
   }
   ${G} .threads-list > div + div { border-top: 1px solid rgba(255, 255, 255, .06) !important; }
   ${G} [style*="5px var(--coral)"] { border-left-color: #3a3a3a !important; }
+  ${G} .quote { border-left-color: #5a5a5a !important; }
+  ${G} .tablinks.active { color: #e3b552 !important; border-bottom-color: #d4a640 !important; }
+  ${G} .tablinks.active [class^="tabImage"], ${G} .menu-icon, ${G} .forum_item_icon,
+  ${G} [style*="--report"], ${G} [style*="--boton-citar"], ${G} img[id^="mq_"] { filter: ${ICONO_ORO} !important; }
   ${G} .threads-list [style*="--message"], ${G} .threads-list [style*="--tema-participado"] { filter: ${ICONO_ORO} !important; }
   ${G} [style*="--next-right-icon"], ${G} [style*="--next-left-icon"], ${G} [style*="--final-right-icon"],
   ${G} [style*="--final-left-icon"], ${G} [style*="--go-to-post"], ${G} [style*="--boton-reply"],
@@ -1836,6 +1842,25 @@
       }
     }
 
+    // El editor de respuestas es un iframe con el fondo blanco: se oscurece por dentro
+    const EDITOR_CSS = `html:not(#_):not(#_), html:not(#_):not(#_) body:not(#_) { background: #000 !important; color: #ececec !important; caret-color: #e3b552; }
+      html:not(#_):not(#_) body:not(#_) * { color: inherit !important; background-color: transparent !important; }
+      html:not(#_):not(#_) a:not(#_) { color: #e3b552 !important; } ::selection { background: rgba(212, 166, 64, .38); }`;
+    // La web reescribe el documento del editor después de cargarlo: se revisa cada segundo
+    setInterval(() => styleEditors(), 1000);
+    function styleEditors() {
+      if (!CFG.temaDorado || !root.hasAttribute(ON) || !document.body) return;
+      for (const f of document.querySelectorAll('iframe.iframe_vB_Editor, iframe[id^="vB_Editor"]')) {
+        let d = null;
+        try { d = f.contentDocument; } catch (_) { /* otro origen */ }
+        if (!d || !d.documentElement || d.getElementById('fc-ed')) continue;
+        const st = d.createElement('style');
+        st.id = 'fc-ed';
+        st.textContent = EDITOR_CSS;
+        (d.head || d.documentElement).append(st);
+      }
+    }
+
     /* ── Enganches comunes ── */
     function extrasAdded(n) {
       if (n.nodeType === 3) {
@@ -1873,6 +1898,7 @@
       tryInsertBar();
       applyPremium();
       applyYo();
+      styleEditors();
     }
 
     if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('★ Favoritos e hilos ocultos', openThreadsPanel);
