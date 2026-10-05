@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.7.8
+// @version      1.7.9
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -213,7 +213,7 @@
   ${G} .switch input:checked + .slider { background-color: rgba(212, 166, 64, .35) !important; }
   ${G} .switch .slider::before { background-color: #e3b552 !important; }
   ${G} [style*="--message"], ${G} [style*="--tema-participado"] { filter: ${ICONO_ORO} opacity(.5) !important; }
-  ${G} .threads-list [style*="--citas"], ${G} .single-icon-image[style*="--citas"] { opacity: .45 !important; }
+  ${G} .threads-list [style*="--citas"], ${G} .single-icon-image[style*="--citas"] { filter: ${ICONO_ORO} opacity(.5) !important; }
   ${G} .threads-list [style*="--citas"] + span { margin-right: 12px !important; font-variant-numeric: tabular-nums; }
   ${G} [style*="--next-right-icon"], ${G} [style*="--next-left-icon"], ${G} [style*="--final-right-icon"],
   ${G} [style*="--final-left-icon"], ${G} [style*="--go-to-post"], ${G} [style*="--boton-reply"],
