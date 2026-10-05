@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.6.9
+// @version      1.7.0
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -37,6 +37,7 @@
                            // (los recuadros completos, como los campos de texto, solo se atenúan para no perderlos)
     quitarAnuncios: true,  // oculta anuncios y deja el menú de Tampermonkey para quitar lo que se escape
     premium: true,         // tu nick en dorado con insignia Premium en el panel lateral (solo lo ves tú)
+    temaDorado: true,      // detalles dorados en el modo oscuro: acentos, iconos, cabeceras y paneles del script
     pseudoElementos: true, // procesa también ::before / ::after
     barraNavegador: true,  // barra del navegador en negro (meta theme-color)
     umbralOscuro: 90,      // luminancia máx. (0-255) del fondo para considerar que el modo oscuro está activo
@@ -168,7 +169,38 @@
   [${BADGE_ATTR}] svg { width: 1.25em; height: 1.25em; fill: currentColor; }
   @media (prefers-reduced-motion: reduce) { [${GOLD_ATTR}] { animation: none; } }
 `;
-    style.textContent = `@layer fc-oled {${RULES}${AD_RULES}${LN_RULES}${PREMIUM_RULES}}\n${RULES}${AD_RULES}${LN_RULES}${PREMIUM_RULES}`;
+    /* ── Tema dorado: solo con el modo oscuro activo. Los acentos de la web (coral) pasan a oro
+     * cambiando sus variables, y los iconos rojos o blancos se tiñen con un filtro.          ── */
+    const ICONO_ORO = 'grayscale(1) brightness(1.15) sepia(1) saturate(2.4) hue-rotate(-6deg) brightness(.95)';
+    const GOLD_RULES = !CFG.temaDorado ? '' : `
+  ${G} > body {
+    --coral: #e3b552 !important; --new-primary: #b8862b !important; --new-button-red-hover: #9c7022 !important;
+    --link-hover: #f1cf72 !important; --thread-notification-bullet-blue: #c9993a !important;
+    --forum-title-background: transparent !important;
+  }
+  ${G} { scrollbar-color: #4a3812 #000 !important; accent-color: #d4a640; caret-color: #e3b552; }
+  ${G} ::selection { background: rgba(212, 166, 64, .38); color: #fff; }
+  ${G} #header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(212, 166, 64, .5) 18%, #f1cf72 50%, rgba(212, 166, 64, .5) 82%, transparent);
+  }
+  ${G} .threads-list-header {
+    background: transparent !important; min-height: 0 !important; padding: 10px 0 6px !important;
+    border-bottom: 1px solid rgba(212, 166, 64, .16) !important;
+  }
+  ${G} .threads-list-header > span {
+    font: 700 11px/1 system-ui, -apple-system, Roboto, sans-serif !important; letter-spacing: .18em !important;
+    text-transform: uppercase !important; color: #d4a640 !important;
+  }
+  ${G} .threads-list > div + div { border-top: 1px solid rgba(212, 166, 64, .09) !important; }
+  ${G} [style*="--message"], ${G} [style*="--tema-participado"], ${G} [style*="--tema-golden"],
+  ${G} [style*="--next-right-icon"], ${G} [style*="--next-left-icon"], ${G} [style*="--final-right-icon"],
+  ${G} [style*="--final-left-icon"], ${G} [style*="--go-to-post"], ${G} [style*="--boton-reply"],
+  ${G} .forocoches-search-icon, ${G} .subscribe-thread-icon { filter: ${ICONO_ORO} !important; }
+  ${G} .threads-list [style*="--citas"] { filter: ${ICONO_ORO} opacity(.75) !important; }
+  ${G} .quote { border-left-color: #b8862b !important; }
+`;
+    style.textContent = `@layer fc-oled {${RULES}${AD_RULES}${LN_RULES}${PREMIUM_RULES}${GOLD_RULES}}\n${RULES}${AD_RULES}${LN_RULES}${PREMIUM_RULES}${GOLD_RULES}`;
     // Va el primero del documento: así su @layer se declara antes que cualquier capa de la web
     // y sus !important tienen prioridad sobre los de ella.
     const placeStyle = () => {
@@ -895,21 +927,23 @@
 
     const PICKER_CSS = `
       :host { all: initial; }
-      .hl { position: fixed; pointer-events: none; box-sizing: border-box; border: 2px solid #ff453a;
-            background: rgba(255, 69, 58, .16); border-radius: 3px; }
-      .hl.otro { border-style: dashed; background: rgba(255, 69, 58, .08); }
+      .hl { position: fixed; pointer-events: none; box-sizing: border-box; border: 2px solid #e3b552;
+            background: rgba(227, 181, 82, .14); border-radius: 3px; }
+      .hl.otro { border-style: dashed; background: rgba(227, 181, 82, .07); }
       .bar { position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-             pointer-events: auto; background: #0d0d0d; color: #f2f2f2; border: 1px solid #2c2c2c;
-             border-radius: 14px; padding: 12px; font: 15px/1.35 system-ui, -apple-system, Roboto, sans-serif;
-             box-shadow: 0 10px 30px rgba(0, 0, 0, .7); }
+             pointer-events: auto; background: linear-gradient(180deg, #14110a, #0a0a0a 60%); color: #f2f2f2;
+             border: 1px solid rgba(212, 166, 64, .35); border-radius: 16px; padding: 14px;
+             font: 15px/1.35 system-ui, -apple-system, Roboto, sans-serif;
+             box-shadow: 0 10px 30px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(241, 207, 114, .12); }
       .info { margin: 0 0 10px; }
       .info code { display: block; margin-top: 4px; color: #8e8e8e; font: 12px/1.3 ui-monospace, monospace; word-break: break-all; }
       .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      button { font: inherit; min-height: 44px; border-radius: 10px; border: 1px solid #333; background: #1a1a1a;
-               color: inherit; padding: 0 10px; -webkit-tap-highlight-color: transparent; }
-      button:active { background: #262626; }
+      button { font: inherit; min-height: 44px; border-radius: 10px; border: 1px solid rgba(212, 166, 64, .28); background: #151309;
+               color: #eadcb8; padding: 0 10px; -webkit-tap-highlight-color: transparent; }
+      button:active { background: #221d0e; }
       button.wide { grid-column: 1 / -1; }
-      button.pri { background: #ff453a; border-color: #ff453a; color: #fff; font-weight: 600; }
+      button.pri { background: linear-gradient(135deg, #f6e27a, #d4a640 55%, #b5832a); border-color: transparent;
+                   color: #1f1500; font-weight: 700; }
       button:disabled { opacity: .35; }
       [hidden] { display: none !important; }
     `;
@@ -1333,15 +1367,15 @@
     // Panel para ver y editar la lista
     const LN_CSS = `
       .back { position: fixed; inset: 0; background: rgba(0, 0, 0, .65); }
-      .title { margin: 0 0 4px; font-weight: 600; font-size: 17px; }
+      .title { margin: 0 0 4px; font-weight: 700; font-size: 17px; color: #f1cf72; letter-spacing: .02em; }
       .hint { margin: 0 0 12px; color: #9a9a9a; font-size: 13px; }
       ul { list-style: none; margin: 0 0 12px; padding: 0; max-height: 42vh; overflow: auto; }
-      li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c1c1c; }
+      li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(212, 166, 64, .12); }
       li span { word-break: break-all; }
       li button { min-height: 38px; }
       .empty { color: #8e8e8e; border: 0; }
       .add { display: flex; gap: 8px; margin-bottom: 8px; }
-      input { flex: 1; min-width: 0; font: inherit; color: inherit; background: #141414; border: 1px solid #333;
+      input { flex: 1; min-width: 0; font: inherit; color: inherit; background: #100e08; border: 1px solid rgba(212, 166, 64, .3);
               border-radius: 10px; padding: 0 12px; min-height: 44px; }
     `;
     function openListPanel() {
@@ -1459,7 +1493,7 @@
     // Bloque "★ Favoritos" anclado al principio del listado
     const PINS_CSS = `
       :host { display: block; }
-      .box { padding: 2px 0 6px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+      .box { padding: 2px 0 6px; border-bottom: 1px solid rgba(212, 166, 64, .16); }
       .hd { display: flex; align-items: center; gap: 5px; padding: 6px 16px 4px; color: #e0b450;
             font: 700 10px/1 system-ui, -apple-system, Roboto, sans-serif; letter-spacing: .09em; text-transform: uppercase; }
       .hd svg { width: 11px; height: 11px; fill: currentColor; }
@@ -1595,12 +1629,13 @@
       :host { display: block; }
       .bar { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 12px 16px 16px; }
       button { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; min-height: 40px;
-               padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .16); color: #e6e6e6; cursor: pointer;
+               padding: 0 16px; border-radius: 999px; border: 1px solid rgba(212, 166, 64, .4); color: #eadcb8; cursor: pointer;
                font: 600 14px/1 system-ui, -apple-system, Roboto, sans-serif; -webkit-tap-highlight-color: transparent;
                transition: transform .12s, border-color .2s, color .2s; }
       button:active { transform: scale(.96); }
       button svg { width: 17px; height: 17px; fill: currentColor; }
-      button.fav.on { border-color: #d4a640; color: #f1cf72; }
+      button.fav.on { background: linear-gradient(135deg, #f6e27a, #d4a640 55%, #b5832a); border-color: transparent; color: #1f1500;
+                      box-shadow: 0 2px 14px rgba(212, 166, 64, .35); }
       button.hid.on { border-color: rgba(255, 90, 74, .7); color: #ff8a7a; }
     `;
     let barHost = null;
