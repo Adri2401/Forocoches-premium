@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.6.7
+// @version      1.6.8
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -108,6 +108,9 @@
       '[class~="ad-slot"]', '[class~="ad-container"]', '[class~="ad-wrapper"]', '[class~="ad-banner"]', '[class~="banner-ad"]',
       '[id~="ad"]', '[id^="ad-slot"]', '[id^="adslot"]',
       '[class*="publicidad" i]', '[id*="publicidad" i]', '[class*="patrocin" i]',
+      // ForoCoches: hueco del banner del patrocinador (p. ej. Surfshark) justo encima de "Temas".
+      // Sin sesión está vacío; con sesión lleva el banner. Nunca si trae subforos.
+      '.block > div:has(+ .threads-list-header):not(:has(a[href*="forumdisplay"]))',
     ].filter(validSel);
     const AD_JOINED = AD_CSS.join(', ');
     const hideRules = (sels) => sels.map((sel) => `${sel} { display: none !important; }`).join('\n');
