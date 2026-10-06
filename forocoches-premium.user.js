@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.8.1
+// @version      1.8.2
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -198,8 +198,26 @@
     text-transform: uppercase !important; color: #d4a640 !important;
   }
   ${G} .threads-list > div + div { border-top: 1px solid rgba(255, 255, 255, .06) !important; }
-  ${G} [style*="5px var(--coral)"] { border-left-color: #3a3a3a !important; }
-  ${G} .quote { border-left-color: #5a5a5a !important; }
+  /* Mensajes del autor del hilo (OP): barra dorada que se desvanece, fondo cálido y etiqueta OP */
+  ${G} [style*="5px var(--coral)"] {
+    border-left: 3px solid transparent !important;
+    border-image: linear-gradient(180deg, #e3b552, rgba(212, 166, 64, .12)) 1 !important;
+    background: linear-gradient(90deg, rgba(212, 166, 64, .07), rgba(212, 166, 64, .015) 45%, transparent) !important;
+  }
+  ${G} [style*="5px var(--coral)"] [id^="postmenu_"] > b > a::after {
+    content: "OP"; display: inline-block; margin-left: 7px; padding: 2px 6px 1px; border-radius: 4px; vertical-align: 2px;
+    font: 800 9px/1.2 system-ui, -apple-system, Roboto, sans-serif; letter-spacing: .1em;
+    color: #1f1500; background: linear-gradient(135deg, #f6e27a, #d4a640 55%, #b5832a);
+  }
+  /* Citas: tarjeta con fondo sutil y barra dorada fina */
+  ${G} .quote {
+    border-left: 2px solid rgba(212, 166, 64, .6) !important; border-radius: 0 10px 10px 0 !important;
+    background: linear-gradient(90deg, rgba(212, 166, 64, .08), rgba(255, 255, 255, .03) 55%) !important;
+    padding: 10px 12px !important;
+  }
+  ${G} .quote > div:first-child { color: #bfae84 !important; font-size: .9em; margin-bottom: 6px !important; }
+  ${G} .quote > div:first-child b { color: #f2f2f2 !important; }
+  ${G} .quote > div:nth-child(2) { margin-bottom: 2px !important; }
   ${G} .tablinks.active { color: #e3b552 !important; border-bottom-color: #d4a640 !important; }
   ${G} .tablinks.active [class^="tabImage"], ${G} .menu-icon, ${G} .forum_item_icon,
   ${G} [style*="--report"], ${G} [style*="--boton-citar"], ${G} img[id^="mq_"],
