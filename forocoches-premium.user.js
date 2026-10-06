@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ForoCoches Premium
 // @namespace    https://forocoches.com/
-// @version      1.8.2
+// @version      1.8.3
 // @homepageURL  https://github.com/Adri2401/Forocoches-premium
 // @supportURL   https://github.com/Adri2401/Forocoches-premium/issues
 // @updateURL    https://raw.githubusercontent.com/Adri2401/Forocoches-premium/main/forocoches-premium.user.js
@@ -178,12 +178,17 @@
     const ICONO_ORO = 'brightness(0) saturate(100%) invert(98%) sepia(81%) saturate(2130%) hue-rotate(316deg) brightness(95%) contrast(87%)';
     const GOLD_RULES = !CFG.temaDorado ? '' : `
   ${G} > body {
-    --coral: #ededed !important; --new-primary: #b8862b !important; --new-button-red-hover: #9c7022 !important;
+    --coral: #cfcfcf !important; --new-primary: #b8862b !important; --new-button-red-hover: #9c7022 !important;
+    /* Texto en blanco roto: el blanco puro sobre negro puro deslumbra en OLED */
+    --text-color: #d4d4d4 !important; --text-color-clear: #d4d4d4 !important; --subtitle-text-color-clear: #d4d4d4 !important;
+    --simple-title-color: #dedede !important; --header-menu-text-color: #dedede !important;
+    --threadbit-dark-gray-color: #9a9a9a !important; --date-gray-color: #9a9a9a !important; --gray-text: #8a8a8a !important;
     --link-hover: #ffffff !important; --thread-notification-bullet-blue: #5a5a5a !important;
     --quote-color: #e3b552 !important;
     --forum-title-background: transparent !important;
   }
   ${G} { scrollbar-color: #4a3812 #000 !important; accent-color: #d4a640; caret-color: #e3b552; }
+  ${G} > body { color: #d4d4d4 !important; }
   ${G} ::selection { background: rgba(212, 166, 64, .38); color: #fff; }
   ${G} #header::after {
     content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
@@ -216,7 +221,7 @@
     padding: 10px 12px !important;
   }
   ${G} .quote > div:first-child { color: #bfae84 !important; font-size: .9em; margin-bottom: 6px !important; }
-  ${G} .quote > div:first-child b { color: #f2f2f2 !important; }
+  ${G} .quote > div:first-child b { color: #dedede !important; }
   ${G} .quote > div:nth-child(2) { margin-bottom: 2px !important; }
   ${G} .tablinks.active { color: #e3b552 !important; border-bottom-color: #d4a640 !important; }
   ${G} .tablinks.active [class^="tabImage"], ${G} .menu-icon, ${G} .forum_item_icon,
@@ -1542,7 +1547,7 @@
       a { display: flex; align-items: baseline; gap: 10px; padding: 5px 16px; color: inherit; text-decoration: none;
           font-size: 14px; line-height: 1.3; -webkit-tap-highlight-color: transparent; }
       a:active { opacity: .7; }
-      .t { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; color: #fff; }
+      .t { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; color: #dedede; }
       .m { flex: none; color: #8c8c8c; font-size: 12px; white-space: nowrap; }
     `;
     let pinsHost = null;
@@ -1879,7 +1884,7 @@
     }
 
     // El editor de respuestas es un iframe con el fondo blanco: se oscurece por dentro
-    const EDITOR_CSS = `html:not(#_):not(#_), html:not(#_):not(#_) body:not(#_) { background: #000 !important; color: #ececec !important; caret-color: #e3b552; }
+    const EDITOR_CSS = `html:not(#_):not(#_), html:not(#_):not(#_) body:not(#_) { background: #000 !important; color: #d4d4d4 !important; caret-color: #e3b552; }
       html:not(#_):not(#_) body:not(#_) * { color: inherit !important; background-color: transparent !important; }
       html:not(#_):not(#_) a:not(#_) { color: #e3b552 !important; } ::selection { background: rgba(212, 166, 64, .38); }`;
     // La web reescribe el documento del editor después de cargarlo: se revisa cada segundo
